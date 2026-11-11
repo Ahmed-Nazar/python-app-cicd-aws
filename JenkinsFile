@@ -2,7 +2,7 @@ pipeline{
     agent any
 
     environment{
-        DOCKER_CREDENTIAL = credentials('ahmednazar2002')
+        DOCKER_CREDENTIAL = credentials('dockerhub-credentials')
     }
 
     stages{
@@ -27,19 +27,31 @@ pipeline{
             }
         }
 
-        stage('push image & logout'){
+        stage('push image'){
             steps{
                 sh 'docker push ahmednazar2002/health-web:latest'
-                sh 'docker logout'
             }
         }
 
-        stage('connect vm'){
+        stage('connect vm & deploy'){
             steps{
-                sshagent(credentials: ['debian']){
-                    sh 'ssh -o StrictHostKeyChecking=accept-new debian@192.168.8.156 "docker ps"'
+                sshagent(credentials: ['debian-pc']){
+                    sh '''
+                        ssh -o StrictHostKeyChecking=accept-new debian@192.168.8.156 "
+                        docker pull ahmednazar2002/health-web:latest &&\
+                        docker logout &&\
+                        docker rm -f health-web || true && \
+                        docker run -d \
+                        -p 5000:5000 \
+                        --name health-web \
+                        --restart unless-stopped\
+                        ahmednazar2002/health-web:latest "
+                        '''
+
                 }
             }
         }
+
+        
     }
 }
