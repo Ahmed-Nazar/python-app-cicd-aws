@@ -1,0 +1,45 @@
+pipeline{
+    agent any
+
+    environment{
+        DOCKER_CREDENTIAL = credentials('ahmednazar2002')
+    }
+
+    stages{
+        stage('Pulling Code'){
+            steps{
+                git branch: 'main', credentialsId: 'my-app', url: 'https://github.com/Ahmed-Nazar/Webapp-with-Pipeline-Docker.git'
+            }
+        }
+
+        stage('Build'){
+            steps{
+                sh 'docker build -t ahmednazar2002/health-web:latest .'
+            }
+        }
+
+        stage('login to docker'){
+            steps{
+                sh '''
+                    echo $DOCKER_CREDENTIAL_PSW | docker login \
+                    -u $DOCKER_CREDENTIAL_USR --password-stdin
+                    '''
+            }
+        }
+
+        stage('push image & logout'){
+            steps{
+                sh 'docker push ahmednazar2002/health-web:latest'
+                sh 'docker logout'
+            }
+        }
+
+        stage('connect vm'){
+            steps{
+                sshagent(credentials: ['debian']){
+                    sh 'ssh -o StrictHostKeyChecking=accept-new debian@192.168.8.156 "docker ps"'
+                }
+            }
+        }
+    }
+}
