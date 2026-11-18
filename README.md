@@ -100,8 +100,7 @@ The following screenshots demonstrate the major components of the implementation
 ### 3. AWS EC2 Instance
 
 ![AWS EC2 Instance](./screenshots/aws-ec2-instance.png)
-(./screenshots/aws-ec2-instance.png)
-(./screenshots/aws-2.png)
+![AWS EC2 Instance](./screenshots/aws-2.png)
 
 *Running AWS EC2 deployment instance.*
 
